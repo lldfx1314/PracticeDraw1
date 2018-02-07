@@ -63,7 +63,7 @@ public class Practice4DrawPointView extends View {
         int mode = MeasureSpec.getMode(measureSpec);
         if (mode == MeasureSpec.EXACTLY) {
             result = size;
-        } else {
+        } else if (mode == MeasureSpec.AT_MOST){
             result = Math.max(size, result);
         }
         return result;
