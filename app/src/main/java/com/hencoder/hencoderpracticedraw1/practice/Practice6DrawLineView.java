@@ -69,7 +69,7 @@ public class Practice6DrawLineView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        //        练习内容：使用 canvas.drawLine() 方法画直线
         canvas.drawLine(paddingStart,paddingTop,mAbsWidth+paddingStart,mAbsHeight+paddingTop,mLinePaint);
-//        练习内容：使用 canvas.drawLine() 方法画直线
     }
 }
