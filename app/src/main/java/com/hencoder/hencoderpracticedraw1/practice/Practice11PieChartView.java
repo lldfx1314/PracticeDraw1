@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.hencoder.hencoderpracticedraw1.model.PieChartData;
@@ -61,6 +60,8 @@ public class Practice11PieChartView extends View {
 
     private RectF mRectF = new RectF();
 
+    private RectF mSpecialRectF = new RectF();
+
     private int mCircleRadius;
 
     private Paint mArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -75,13 +76,13 @@ public class Practice11PieChartView extends View {
     private float mCircleCenterY;
 
     {
-        pieChartData.add(new PieChartData("Gingerbread", Color.MAGENTA, 6));
-        pieChartData.add(new PieChartData("IceCreamSandwich", Color.DKGRAY, 5));
-        pieChartData.add(new PieChartData("Jelly Bean", Color.GREEN, 65));
-        pieChartData.add(new PieChartData("KitKat", Color.BLUE, 99));
-        pieChartData.add(new PieChartData("Lollipop", Color.RED, 123));
-        pieChartData.add(new PieChartData("Marshmallow", Color.YELLOW, 60));
-        pieChartData.add(new PieChartData("Froyo", Color.GRAY, 1));
+        pieChartData.add(new PieChartData("Gingerbread", 0xFF9C27B0, 5, 1));
+        pieChartData.add(new PieChartData("IceCreamSandwich", 0xFF9E9E9E, 4, 1));
+        pieChartData.add(new PieChartData("Jelly Bean", 0xFF009688, 63, 2));
+        pieChartData.add(new PieChartData("KitKat", 0xFF2196F3, 99, 0));
+        pieChartData.add(new PieChartData("Lollipop", 0xFFF44336, 123, 0));
+        pieChartData.add(new PieChartData("Marshmallow", 0xFFFFC107, 60, 0));
+        pieChartData.add(new PieChartData("Froyo", 0, 1, 0));
 
         mArcPaint.setStyle(Paint.Style.FILL);
 
@@ -162,42 +163,77 @@ public class Practice11PieChartView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        //饼图的绘制起始角度
         mStartAngle = 0F;
+        //绘制所有饼图
         for (int i = 0; i < pieChartData.size(); i++) {
+            //获取数据的值
             PieChartData pieChartData = this.pieChartData.get(i);
+            //饼图的角度
             int value = pieChartData.getValue();
+            //饼图的Padding角度
+            int paddingValue = pieChartData.getPaddingValue();
+            //设置要绘制的饼图的颜色
             mArcPaint.setColor(pieChartData.getColor());
-            canvas.drawArc(mRectF, mStartAngle, value, true, mArcPaint);
+            //饼图的绘制停止角度
             float mStopAngle = mStartAngle + value;
+            //饼图的绘制中间度
             float mHalfAngle = (mStartAngle + mStopAngle) / 2;
-            mStartAngle += value;
+            //如果是要进行特殊绘制的饼图
+            if (i != 4) {
+                canvas.drawArc(mRectF, mStartAngle, value, true, mArcPaint);
 
-            Log.e(TAG, "onDraw mHalfAngle: " + mHalfAngle);
+                float mPointStopX = (float) (mCircleCenterX + (mCircleRadius + 50) * Math.cos(mHalfAngle * Math.PI / 180));
+                float mPointStopY = (float) (mCircleCenterY + (mCircleRadius + 50) * Math.sin(mHalfAngle * Math.PI / 180));
+                float mPointStartX = (float) (mCircleCenterX + (mCircleRadius) * Math.cos(mHalfAngle * Math.PI / 180));
+                float mPointStartY = (float) (mCircleCenterY + (mCircleRadius) * Math.sin(mHalfAngle * Math.PI / 180));
 
-            float mPointX = (float) (mCircleCenterX + (mCircleRadius + 50) * Math.cos(mHalfAngle * Math.PI / 180));
-            float mPointY = (float) (mCircleCenterY + (mCircleRadius + 50) * Math.sin(mHalfAngle * Math.PI / 180));
-            Log.e(TAG, "mPointX: " + mPointX);
-            Log.e(TAG, "mPointY: " + mPointY);
+                canvas.drawLine(mPointStartX, mPointStartY, mPointStopX, mPointStopY, mLinePaint);
 
-            canvas.drawLine(mCircleCenterX, mCircleCenterY, mPointX, mPointY, mLinePaint);
-            float mStopXline = 0;
-            if (mHalfAngle >= 270 || mHalfAngle < 90) {
-                mStopXline = mPointX + 50;
+                float mStopXLine = 0;
+                if (mHalfAngle >= 270 || mHalfAngle < 90) {
+                    mStopXLine = mPointStopX + 100;
+                    mTextPaint.setTextAlign(Paint.Align.LEFT);
+                    canvas.drawText(pieChartData.getTitle(), mStopXLine, mPointStopY, mTextPaint);
+                    canvas.drawLine(mPointStopX, mPointStopY, mStopXLine, mPointStopY, mLinePaint);
+                } else if (mHalfAngle < 270) {
+                    mStopXLine = mPointStopX - 100;
+                    mTextPaint.setTextAlign(Paint.Align.RIGHT);
+                    canvas.drawText(pieChartData.getTitle(), mStopXLine, mPointStopY, mTextPaint);
+                    canvas.drawLine(mPointStopX, mPointStopY, mStopXLine, mPointStopY, mLinePaint);
+                }
+            } else {
+                //计算偏移后的圆心,按照角度的中心线进行偏移
+                float mSpecialCircleCenterX = (float) (mCircleCenterX + (25) * Math.cos(mHalfAngle * Math.PI / 180));
+                float mSpecialCircleCenterY = (float) (mCircleCenterY + (25) * Math.sin(mHalfAngle * Math.PI / 180));
 
-                mTextPaint.setTextAlign(Paint.Align.LEFT);
-                canvas.drawText(pieChartData.getTitle(), mStopXline, mPointY, mTextPaint);
+                mSpecialRectF.set(mSpecialCircleCenterX - mCircleRadius, mSpecialCircleCenterY - mCircleRadius,
+                        mSpecialCircleCenterX + mCircleRadius, mSpecialCircleCenterY + mCircleRadius);
 
-                canvas.drawLine(mPointX, mPointY, mStopXline, mPointY, mLinePaint);
-            } else if (mHalfAngle < 270) {
-                mStopXline = mPointX - 50;
+                canvas.drawArc(mSpecialRectF, mStartAngle, value, true, mArcPaint);
 
-                mTextPaint.setTextAlign(Paint.Align.RIGHT);
-                canvas.drawText(pieChartData.getTitle(), mStopXline, mPointY, mTextPaint);
+                float mPointStopX = (float) (mSpecialCircleCenterX + (mCircleRadius + 50) * Math.cos(mHalfAngle * Math.PI / 180));
+                float mPointStopY = (float) (mSpecialCircleCenterY + (mCircleRadius + 50) * Math.sin(mHalfAngle * Math.PI / 180));
+                float mPointStartX = (float) (mSpecialCircleCenterX + (mCircleRadius) * Math.cos(mHalfAngle * Math.PI / 180));
+                float mPointStartY = (float) (mSpecialCircleCenterY + (mCircleRadius) * Math.sin(mHalfAngle * Math.PI / 180));
 
-                canvas.drawLine(mPointX, mPointY, mStopXline, mPointY, mLinePaint);
+                canvas.drawLine(mPointStartX, mPointStartY, mPointStopX, mPointStopY, mLinePaint);
+
+                float mStopXLine = 0;
+                if (mHalfAngle >= 270 || mHalfAngle < 90) {
+                    mStopXLine = mPointStopX + 100;
+                    mTextPaint.setTextAlign(Paint.Align.LEFT);
+                    canvas.drawText(pieChartData.getTitle(), mStopXLine, mPointStopY, mTextPaint);
+                    canvas.drawLine(mPointStopX, mPointStopY, mStopXLine, mPointStopY, mLinePaint);
+                } else if (mHalfAngle < 270) {
+                    mStopXLine = mPointStopX - 100;
+                    mTextPaint.setTextAlign(Paint.Align.RIGHT);
+                    canvas.drawText(pieChartData.getTitle(), mStopXLine, mPointStopY, mTextPaint);
+                    canvas.drawLine(mPointStopX, mPointStopY, mStopXLine, mPointStopY, mLinePaint);
+                }
             }
-
+            mStartAngle += value + paddingValue;
         }
-        canvas.drawText("饼图", mCircleCenterX,mAbsHeight - mBottomTitleHeight *0.5F, mTitlePaint);
+        canvas.drawText("饼图", mCircleCenterX, mAbsHeight - mBottomTitleHeight * 0.5F, mTitlePaint);
     }
 }

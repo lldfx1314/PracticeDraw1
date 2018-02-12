@@ -13,10 +13,14 @@ public class PieChartData {
 
     private int value;
 
-    public PieChartData(String title, int color, int value) {
+    private int paddingValue;
+
+    public PieChartData(String title, int color, int value, int paddingValue) {
         this.title = title;
         this.color = color;
         this.value = value;
+        this.paddingValue = paddingValue;
+
     }
 
     public String getTitle() {
@@ -41,5 +45,13 @@ public class PieChartData {
 
     public void setValue(int value) {
         this.value = value;
+    }
+
+    public int getPaddingValue() {
+        return paddingValue;
+    }
+
+    public void setPaddingValue(int paddingValue) {
+        this.paddingValue = paddingValue;
     }
 }
